@@ -1,7 +1,7 @@
 -- Genv Logged By Crxkv And Enzo
--- Yo Deals Custom Hub + Violette TP Bat Integration (Cleaned & Direct)
+-- Yo Deals Custom Hub + Anti Bat V2 + Violette TP Bat + Anti Medusa + يحيى في 2 + Aimbot Integration
 
--- 1. تشغيل سكريبت Yo Deals الأساسي في أول الكود عبر الـ loadstring المطلوب
+-- 1. تشغيل سكريبت Yo Deals الأساسي
 task.spawn(function()
     local success, err = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/Yo-Deals-/refs/heads/main/main.lua"))()
@@ -32,15 +32,190 @@ end
 -- متغيرات التحكم والوظائف الأساسية
 local AntiResetEnabled = false
 local AntiBatEnabled = false
+local AntiBatV2Enabled = false
+local AntiMedusaEnabled = false
+local YahyaV2Enabled = false
+local MedusaToolDetected = false
 local InfiniteJumpEnabled = false
 local InfiniteJumpHoldEnabled = false
 local AntiKickEnabled = false
 local VioletteBatUIEnabled = false
+local InputSourceEnabled = false
 
 local IsJumpingHold = false
 local AntiBatConn = nil
+local AntiBatV2Connection = nil
 local AntiResetConn = nil
+local AntiMedusaConn = nil
+local YahyaV2Conn = nil
 local JumpHoldConn = nil
+
+local deathCoords = CFrame.new(1000003.56, 999999.69, 8.17)
+
+-- متغيرات وسكربت الـ Aimbot المدمج
+local AimbotState = {enabled = false, speed = 56.5, meleeOffset = 2, autoDropBrainrot = true, highlightEnabled = true}
+
+local function findBat()
+    local c = player.Character
+    if not c then return nil end
+    local bp = player:FindFirstChildOfClass("Backpack")
+    for _, ch in ipairs(c:GetChildren()) do
+        if ch:IsA("Tool") and (ch.Name:lower():find("bat") or ch.Name:lower():find("slap")) then return ch end
+    end
+    if bp then
+        for _, ch in ipairs(bp:GetChildren()) do
+            if ch:IsA("Tool") and (ch.Name:lower():find("bat") or ch.Name:lower():find("slap")) then return ch end
+        end
+    end
+    local SlapList = {"Bat", "Slap", "Iron Slap", "Gold Slap", "Diamond Slap", "Emerald Slap", "Ruby Slap", "Dark Matter Slap", "Flame Slap", "Nuclear Slap", "Galaxy Slap", "Glitched Slap"}
+    for _, name in ipairs(SlapList) do
+        local t = c:FindFirstChild(name) or (bp and bp:FindFirstChild(name))
+        if t then return t end
+    end
+    return nil
+end
+
+local aimbotHighlight = Instance.new("Highlight")
+aimbotHighlight.Name = "AimbotESP"
+aimbotHighlight.FillColor = Color3.fromRGB(255, 0, 0)
+aimbotHighlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+aimbotHighlight.FillTransparency = 0.5
+aimbotHighlight.OutlineTransparency = 0
+aimbotHighlight.Adornee = nil
+pcall(function() aimbotHighlight.Parent = game:GetService("CoreGui") end)
+if not aimbotHighlight.Parent then aimbotHighlight.Parent = playerGui end
+
+local aimbotLockedTarget = nil
+local aimbotNoTargetSince = nil
+local aimbotConnection = nil
+local antiDieConns = {}
+
+local function _aimbotTargetValid(tc)
+    if not tc or not tc.Parent then return false end
+    local hum = tc:FindFirstChildOfClass("Humanoid")
+    local hrp2 = tc:FindFirstChild("HumanoidRootPart")
+    return hum and hrp2
+end
+
+local function _aimbotGetTarget(myHRP)
+    if aimbotLockedTarget and not _aimbotTargetValid(aimbotLockedTarget) then
+        aimbotLockedTarget = nil
+    end
+    if aimbotLockedTarget then
+        return aimbotLockedTarget:FindFirstChild("HumanoidRootPart"), aimbotLockedTarget
+    end
+    local best, bestDist = nil, math.huge
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player and _aimbotTargetValid(p.Character) then
+            local tHRP = p.Character:FindFirstChild("HumanoidRootPart")
+            local d = (tHRP.Position - myHRP.Position).Magnitude
+            if d < bestDist then bestDist = d; best = p.Character end
+        end
+    end
+    aimbotLockedTarget = best
+    return best and best:FindFirstChild("HumanoidRootPart"), best
+end
+
+local function _activateAntiDie()
+    for _, c in ipairs(antiDieConns) do pcall(function() c:Disconnect() end) end
+    antiDieConns = {}
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    hum.BreakJointsOnDeath = false
+    hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    table.insert(antiDieConns, hum:GetPropertyChangedSignal("Health"):Connect(function()
+        if hum.Health <= 0 then hum.Health = hum.MaxHealth end
+    end))
+end
+
+local function isHoldingBrainrot()
+    local char = player.Character
+    if not char then return false end
+    for _, obj in ipairs(char:GetChildren()) do
+        if obj:IsA("Tool") then
+            local n = obj.Name:lower()
+            if not n:find("bat") and not n:find("slap") and not n:find("medusa") then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function dropBrainrot()
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum.Jump = true
+        task.wait(0.1)
+        hum.Jump = false
+    end
+end
+
+local function startAimbot()
+    if aimbotConnection then aimbotConnection:Disconnect() aimbotConnection = nil end
+    _activateAntiDie()
+    aimbotConnection = RunService.Heartbeat:Connect(function()
+        local char = player.Character
+        if not char or not char.Parent then return end
+        local myHRP = char:FindFirstChild("HumanoidRootPart")
+        if not myHRP then return end
+        local myH = char:FindFirstChildOfClass("Humanoid")
+        if not myH or myH.Health <= 0 then return end
+        if not AimbotState.enabled then
+            if AimbotState.highlightEnabled then aimbotHighlight.Adornee = nil end
+            return
+        end
+        myH.AutoRotate = false
+        local bat = findBat()
+        if bat and bat.Parent ~= char then pcall(function() myH:EquipTool(bat) end) end
+        if AimbotState.autoDropBrainrot and isHoldingBrainrot() then dropBrainrot() end
+        myH:Move(Vector3.new(0, 0, 0), false)
+        local tHRP, tChar = _aimbotGetTarget(myHRP)
+        if tHRP and tChar and tHRP.Parent and tChar.Parent then
+            aimbotNoTargetSince = nil
+            if AimbotState.highlightEnabled then aimbotHighlight.Adornee = tChar end
+            local tVel = tHRP.AssemblyLinearVelocity
+            local predictTime = math.clamp(tVel.Magnitude / 150, 0.05, 0.2)
+            local predicted = tHRP.Position + tVel * predictTime
+            local behindOffset = -tHRP.CFrame.LookVector * AimbotState.meleeOffset
+            local headTopOffset = Vector3.new(0, 2.6, 0)
+            local standPos = predicted + behindOffset + headTopOffset
+            local moveDir = standPos - myHRP.Position
+            local lookTarget = Vector3.new(predicted.X, myHRP.Position.Y, predicted.Z)
+            if (lookTarget - myHRP.Position).Magnitude > 0.1 then
+                myHRP.CFrame = CFrame.lookAt(myHRP.Position, lookTarget) * CFrame.Angles(math.rad(-15), 0, 0)
+            end
+            if moveDir.Magnitude > 1 then
+                myHRP.AssemblyLinearVelocity = moveDir.Unit * AimbotState.speed
+            else
+                myHRP.AssemblyLinearVelocity = tVel
+            end
+        else
+            if not aimbotNoTargetSince then aimbotNoTargetSince = tick() end
+            if tick() - aimbotNoTargetSince > 1.5 then
+                aimbotLockedTarget = nil
+                if myHRP and myHRP.Parent then myHRP.AssemblyLinearVelocity = Vector3.new(0, 0, 0) end
+                if AimbotState.highlightEnabled then aimbotHighlight.Adornee = nil end
+            end
+        end
+    end)
+end
+
+local function stopAimbot()
+    if aimbotConnection then aimbotConnection:Disconnect() aimbotConnection = nil end
+    local char = player.Character
+    local r = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if r then r.AssemblyLinearVelocity = Vector3.zero end
+    if hum then hum.AutoRotate = true end
+    aimbotLockedTarget = nil
+    aimbotNoTargetSince = nil
+    if AimbotState.highlightEnabled then aimbotHighlight.Adornee = nil end
+end
 
 local function addCorner(parent, radius)
     local object = Instance.new("UICorner")
@@ -98,10 +273,7 @@ local function makeDraggable(target)
     end)
 
     UserInputService.InputChanged:Connect(function(input)
-        if not dragging then
-            return
-        end
-
+        if not dragging then return end
         if input.UserInputType ~= Enum.UserInputType.MouseMovement
             and input.UserInputType ~= Enum.UserInputType.Touch then
             return
@@ -139,7 +311,7 @@ local function stopAntiReset()
     end
 end
 
--- منطق الـ Anti Bat
+-- منطق الـ Anti Bat العادي
 local function startAntiBat()
     local char = player.Character
     if not char then return end
@@ -162,6 +334,220 @@ local function stopAntiBat()
     end
 end
 
+-- منطق الـ Anti Bat V2 (تشغيل الـ Loadstring الجديد)
+local function startAntiBatV2()
+    if AntiBatV2Connection then return end
+    AntiBatV2Enabled = true
+    pcall(function()
+        AntiBatV2Connection = loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/98873f97ed10761e0613d10ab6e9e455.lua"))()
+    end)
+end
+
+local function stopAntiBatV2()
+    AntiBatV2Enabled = false
+    -- إذا كان الـ script يرجع دالة أو اتصال يمكن إغلاقه نضعه هنا، أو نتركه يتوقف بحسب السكريبت نفسه
+    AntiBatV2Connection = nil
+end
+
+-- منطق الـ Anti Medusa
+local function findCarpet()
+    local char = player.Character
+    if not char then return nil end
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        for _, tool in ipairs(backpack:GetChildren()) do
+            if tool:IsA("Tool") and tool.Name:lower():find("carpet") then
+                return tool
+            end
+        end
+    end
+    return nil
+end
+
+local function instaResetMedusa()
+    local char = player.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not root or not hum then return end
+
+    local carpet = findCarpet()
+    if carpet then
+        hum:EquipTool(carpet)
+        task.wait(0.1)
+    end
+
+    root.CFrame = deathCoords
+
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
+        if not char or not char.Parent then
+            conn:Disconnect()
+            return
+        end
+        local r = char:FindFirstChild("HumanoidRootPart")
+        if not r then conn:Disconnect() return end
+        r.CFrame = deathCoords
+        local h2 = char:FindFirstChildOfClass("Humanoid")
+        if h2 and h2.Health <= 0 then
+            conn:Disconnect()
+        end
+    end)
+end
+
+local function startAntiMedusa()
+    if AntiMedusaConn then AntiMedusaConn:Disconnect() end
+
+    AntiMedusaConn = RunService.Heartbeat:Connect(function()
+        if not AntiMedusaEnabled then return end
+
+        local char = player.Character
+        if not char then return end
+
+        local hasMedusa = false
+        for _, tool in ipairs(char:GetChildren()) do
+            if tool:IsA("Tool") then
+                local name = tool.Name:lower()
+                if name:find("medusa") or name:find("head") then
+                    hasMedusa = true
+                    if not MedusaToolDetected then
+                        MedusaToolDetected = true
+                        task.delay(1, function()
+                            if AntiMedusaEnabled and MedusaToolDetected then
+                                instaResetMedusa()
+                                MedusaToolDetected = false
+                            end
+                        end)
+                    end
+                    break
+                end
+            end
+        end
+
+        if not hasMedusa then
+            MedusaToolDetected = false
+        end
+    end)
+end
+
+local function stopAntiMedusa()
+    if AntiMedusaConn then
+        AntiMedusaConn:Disconnect()
+        AntiMedusaConn = nil
+    end
+    MedusaToolDetected = false
+end
+
+-- منطق زر "يحيى في 2"
+local resetCooldown = 0
+
+local function forceResetYahyaV2()
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not hum or not root or hum.Health <= 0 then return end
+
+    pcall(function()
+        hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+        root.Velocity = Vector3.zero
+        root.RotVelocity = Vector3.zero
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+
+        for _, obj in ipairs(char:GetDescendants()) do
+            if obj:IsA("Motor6D") then obj.Enabled = true end
+            if obj:IsA("Constraint") then obj.Enabled = true end
+        end
+
+        workspace.CurrentCamera.CameraSubject = hum
+
+        local PM = player.PlayerScripts:FindFirstChild("PlayerModule")
+        if PM then
+            local CM = require(PM:FindFirstChild("ControlModule"))
+            if CM then CM:Enable() end
+        end
+
+        hum.AutoRotate = true
+        hum.PlatformStand = false
+        hum.Sit = false
+    end)
+end
+
+local function startYahyaV2()
+    if YahyaV2Conn then return end
+    YahyaV2Enabled = true
+    YahyaV2Conn = RunService.Heartbeat:Connect(function()
+        if not YahyaV2Enabled then return end
+        local char = player.Character
+        if not char then return end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum or hum.Health <= 0 then return end
+
+        local state = hum:GetState()
+        local isRagdolled = (state == Enum.HumanoidStateType.Physics or
+                             state == Enum.HumanoidStateType.Ragdoll or
+                             state == Enum.HumanoidStateType.FallingDown)
+
+        if isRagdolled then
+            local now = tick()
+            if now - resetCooldown > 0.15 then
+                resetCooldown = now
+                forceResetYahyaV2()
+            end
+        end
+    end)
+end
+
+local function stopYahyaV2()
+    YahyaV2Enabled = false
+    if YahyaV2Conn then
+        YahyaV2Conn:Disconnect()
+        YahyaV2Conn = nil
+    end
+end
+
+-- منطق الـ Input Source
+local function toggleInputSourceUI(state)
+    InputSourceEnabled = state
+    if InputSourceEnabled then
+        if playerGui:FindFirstChild("CustomInputSourceUI") then
+            playerGui.CustomInputSourceUI:Destroy()
+        end
+
+        local inputGui = Instance.new("ScreenGui")
+        inputGui.Name = "CustomInputSourceUI"
+        inputGui.ResetOnSpawn = false
+        inputGui.DisplayOrder = 99999
+        inputGui.Parent = playerGui
+
+        local inputBox = Instance.new("TextButton")
+        inputBox.Name = "InputBox"
+        inputBox.Size = UDim2.new(0, 110, 0, 40)
+        inputBox.Position = UDim2.new(0.5, -55, 0.85, 0)
+        inputBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        inputBox.BorderSizePixel = 0
+        inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+        inputBox.Font = Enum.Font.GothamBold
+        inputBox.TextSize = 14
+        inputBox.Text = "انبوت"
+        inputBox.Active = true
+        inputBox.Draggable = true
+        inputBox.Parent = inputGui
+        addCorner(inputBox, 8)
+        addGradientStroke(inputBox, 1.5, 0)
+
+        inputBox.MouseButton1Click:Connect(function()
+            AimbotState.enabled = not AimbotState.enabled
+            if AimbotState.enabled then startAimbot() else stopAimbot() end
+        end)
+    else
+        if playerGui:FindFirstChild("CustomInputSourceUI") then
+            playerGui.CustomInputSourceUI:Destroy()
+        end
+    end
+end
+
 -- منطق الـ Infinite Jump
 local function startJumpHoldLoop()
     if JumpHoldConn then JumpHoldConn:Disconnect() end
@@ -181,6 +567,10 @@ UserInputService.InputBegan:Connect(function(input, gp)
     if input.KeyCode == Enum.KeyCode.Space or input.UserInputType == Enum.UserInputType.Touch then
         IsJumpingHold = true
     end
+    if input.KeyCode == Enum.KeyCode.M then
+        AimbotState.enabled = not AimbotState.enabled
+        if AimbotState.enabled then startAimbot() else stopAimbot() end
+    end
 end)
 
 UserInputService.InputEnded:Connect(function(input, gp)
@@ -199,7 +589,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- منطق الـ Anti Kick / E01 الجانبي
+-- منطق الـ Anti Kick / E01
 local function isCarrying()
     local char = player.Character
     if not char then return false end
@@ -303,7 +693,7 @@ task.spawn(function()
     end
 end)
 
--- دمج سكريبت Violette TP Bat الاحترافي بالكامل (بالخلفية البنفسجية وصلاحياته الأصلية)
+-- دمج سكريبت Violette TP Bat
 local function toggleVioletteBatScript(state)
     VioletteBatUIEnabled = state
     if VioletteBatUIEnabled then
@@ -583,7 +973,7 @@ local function toggleVioletteBatScript(state)
     end
 end
 
--- بناء واجهة المستخدم الرئيسية (Cursed Hub Style)
+-- بناء واجهة المستخدم الرئيسية مع زيادة الطول لاستيعاب الزر الجديد
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "YoDealsHub"
 screenGui.ResetOnSpawn = false
@@ -594,8 +984,8 @@ screenGui.Parent = playerGui
 
 local borderWrap = Instance.new("Frame")
 borderWrap.Name = "SquircleBorderWrap"
-borderWrap.Size = UDim2.new(0, 280, 0, 368)
-borderWrap.Position = UDim2.new(0.5, -140, 0.5, -184)
+borderWrap.Size = UDim2.new(0, 280, 0, 600)
+borderWrap.Position = UDim2.new(0.5, -140, 0.5, -300)
 borderWrap.BackgroundColor3 = Color3.new(0.0627451, 0.0156863, 0.0235294)
 borderWrap.BackgroundTransparency = 0.15
 borderWrap.BorderSizePixel = 0
@@ -717,7 +1107,7 @@ content.Size = UDim2.new(1, -28, 1, -54)
 content.Position = UDim2.new(0, 14, 0, 48)
 content.BackgroundTransparency = 1
 content.BorderSizePixel = 0
-content.CanvasSize = UDim2.new(0, 0, 0, 370)
+content.CanvasSize = UDim2.new(0, 0, 0, 620)
 content.ScrollBarThickness = 2
 content.ZIndex = 13
 content.Parent = mainFrame
@@ -857,7 +1247,7 @@ local function makeFeatureCard(cardName, text, yOffset, defaultState, callback)
     return card
 end
 
--- إضافة الأزرار الأساسية فقط بدون أي فوضى أو انبوت
+-- إضافة الأزرار بالترتيب في القائمة
 makeFeatureCard("AntiResetCard", "Anti Reset", 0, AntiResetEnabled, function(state)
     AntiResetEnabled = state
     if AntiResetEnabled then startAntiReset() else stopAntiReset() end
@@ -868,30 +1258,49 @@ makeFeatureCard("AntiBatCard", "Anti Bat", 58, AntiBatEnabled, function(state)
     if AntiBatEnabled then startAntiBat() else stopAntiBat() end
 end)
 
-makeFeatureCard("AntiKickCard", "Anti Kick / E01", 116, AntiKickEnabled, function(state)
+makeFeatureCard("AntiBatV2Card", "anti bat v2", 116, AntiBatV2Enabled, function(state)
+    AntiBatV2Enabled = state
+    if AntiBatV2Enabled then startAntiBatV2() else stopAntiBatV2() end
+end)
+
+makeFeatureCard("AntiMedusaCard", "انتي مادوسه", 174, AntiMedusaEnabled, function(state)
+    AntiMedusaEnabled = state
+    if AntiMedusaEnabled then startAntiMedusa() else stopAntiMedusa() end
+end)
+
+makeFeatureCard("YahyaV2Card", "يحيى في 2", 232, YahyaV2Enabled, function(state)
+    YahyaV2Enabled = state
+    if YahyaV2Enabled then startYahyaV2() else stopYahyaV2() end
+end)
+
+makeFeatureCard("InputSourceCard", "Input Source", 290, InputSourceEnabled, function(state)
+    toggleInputSourceUI(state)
+end)
+
+makeFeatureCard("AntiKickCard", "Anti Kick / E01", 348, AntiKickEnabled, function(state)
     AntiKickEnabled = state
 end)
 
-makeFeatureCard("InfJumpCard", "Inf Jump (Normal)", 174, InfiniteJumpEnabled, function(state)
+makeFeatureCard("InfJumpCard", "Inf Jump (Normal)", 406, InfiniteJumpEnabled, function(state)
     InfiniteJumpEnabled = state
 end)
 
-makeFeatureCard("InfJumpHoldCard", "Inf Jump (Hold)", 232, InfiniteJumpHoldEnabled, function(state)
+makeFeatureCard("InfJumpHoldCard", "Inf Jump (Hold)", 464, InfiniteJumpHoldEnabled, function(state)
     InfiniteJumpHoldEnabled = state
     if not InfiniteJumpHoldEnabled then IsJumpingHold = false end
 end)
 
-makeFeatureCard("VioletteBatCard", "Violette TP Bat UI", 290, VioletteBatUIEnabled, function(state)
+makeFeatureCard("VioletteBatCard", "Violette TP Bat UI", 522, VioletteBatUIEnabled, function(state)
     toggleVioletteBatScript(state)
 end)
 
 startJumpHoldLoop()
 
 -- تصغير وتكبير الواجهة
-local EXPANDED_SIZE = UDim2.new(0, 280, 0, 368)
+local EXPANDED_SIZE = UDim2.new(0, 280, 0, 600)
 local COLLAPSED_SIZE = UDim2.new(0, 280, 0, 50)
 local EXPANDED_CONTENT_POSITION = UDim2.new(0, 14, 0, 48)
-local COLLAPSED_CONTENT_POSITION = UDim2.new(0, 14, 0, -370)
+local COLLAPSED_CONTENT_POSITION = UDim2.new(0, 14, 0, -620)
 local collapsed = false
 local minimiseBusy = false
 
@@ -935,15 +1344,15 @@ RunService.RenderStepped:Connect(function(deltaTime)
     titleGradient.Rotation = (titleGradient.Rotation + 1.2 * frameScale) % 360
     minimiseGradient.Rotation = (minimiseGradient.Rotation + 1.6 * frameScale) % 360
 
-    for _, item in animatedCardShines do
+    for _, item in ipairs(animatedCardShines) do
         item.Rotation = (item.Rotation + 1.4 * frameScale) % 360
     end
-    for _, item in animatedCardStrokes do
+    for _, item in ipairs(animatedCardStrokes) do
         item.Rotation = (item.Rotation + 1.8 * frameScale) % 360
     end
-    for _, item in animatedToggleStrokes do
+    for _, item in ipairs(animatedToggleStrokes) do
         item.Rotation = (item.Rotation + 1.8 * frameScale) % 360
     end
 end)
 
-print("[Yo Deals x Violette TP Bat] Loaded Successfully Cleaned!")
+print("[Yo Deals x Yahya Hub + Anti Bat V2] Loaded Successfully!")
