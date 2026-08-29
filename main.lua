@@ -311,19 +311,59 @@ local function stopAntiReset()
     end
 end
 
--- منطق الـ Anti Bat العادي
+-- =========================================================
+--  منطق الـ Anti Bat العادي (تم تعديله وتحصينه ضد كشف Brainrot)
+-- =========================================================
 local function startAntiBat()
     local char = player.Character
     if not char then return end
     local root = char:FindFirstChild("HumanoidRootPart")
     if not root then return end
     if AntiBatConn then AntiBatConn:Disconnect() end
+    
     AntiBatConn = RunService.Heartbeat:Connect(function()
         if not AntiBatEnabled or not root or not root.Parent then return end
+
+        local currentChar = player.Character
+        if not currentChar then return end
+
+        -- 1. فحص إذا كان اللاعب يحمل Brainrot أو أي أداة هامة
+        local carryingItem = false
+        for _, child in ipairs(currentChar:GetChildren()) do
+            if child:IsA("Tool") then
+                local n = child.Name:lower()
+                if not n:find("bat") and not n:find("slap") and not n:find("medusa") then
+                    carryingItem = true
+                    break
+                end
+            end
+        end
+
+        -- فحص الإشارات والخصائص الحركية للغنائم
+        if not carryingItem then
+            for attrName, attrValue in pairs(currentChar:GetAttributes()) do
+                local name = attrName:lower()
+                if (name:find("carrying") or name:find("carry") or name:find("stealing") or name:find("hasbrainrot")) and attrValue == true then
+                    carryingItem = true
+                    break
+                end
+            end
+        end
+
+        -- 2. تنفيذ نبض السرعة بحجم 1000 المظبوط مع الحماية من Drop Brainrot
         local origXZ = Vector3.new(root.Velocity.X, 0, root.Velocity.Z)
-        root.Velocity = Vector3.new(1000, root.Velocity.Y, 1000)
-        RunService.RenderStepped:Wait()
-        root.Velocity = Vector3.new(origXZ.X, root.Velocity.Y, origXZ.Z)
+        
+        if carryingItem then
+            -- عند حمل الـ Brainrot: يتم تقليل السرعة النبضية لحماية الغنيمة من فحص السيرفر السريع
+            root.Velocity = Vector3.new(650, root.Velocity.Y, 650)
+            RunService.RenderStepped:Wait()
+            root.Velocity = Vector3.new(origXZ.X, root.Velocity.Y, origXZ.Z)
+        else
+            -- السرعة القياسية المحددة (1000) في الوضع الطبيعي
+            root.Velocity = Vector3.new(1000, root.Velocity.Y, 1000)
+            RunService.RenderStepped:Wait()
+            root.Velocity = Vector3.new(origXZ.X, root.Velocity.Y, origXZ.Z)
+        end
     end)
 end
 
@@ -345,7 +385,6 @@ end
 
 local function stopAntiBatV2()
     AntiBatV2Enabled = false
-    -- إذا كان الـ script يرجع دالة أو اتصال يمكن إغلاقه نضعه هنا، أو نتركه يتوقف بحسب السكريبت نفسه
     AntiBatV2Connection = nil
 end
 
