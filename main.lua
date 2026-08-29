@@ -31,7 +31,6 @@ end
 
 -- متغيرات التحكم والوظائف الأساسية
 local AntiResetEnabled = false
-local AntiBatEnabled = false
 local AntiBatV2Enabled = false
 local AntiMedusaEnabled = false
 local YahyaV2Enabled = false
@@ -43,7 +42,6 @@ local VioletteBatUIEnabled = false
 local InputSourceEnabled = false
 
 local IsJumpingHold = false
-local AntiBatConn = nil
 local AntiBatV2Connection = nil
 local AntiResetConn = nil
 local AntiMedusaConn = nil
@@ -311,70 +309,7 @@ local function stopAntiReset()
     end
 end
 
--- =========================================================
---  منطق الـ Anti Bat العادي (تم تعديله وتحصينه ضد كشف Brainrot)
--- =========================================================
-local function startAntiBat()
-    local char = player.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-    if AntiBatConn then AntiBatConn:Disconnect() end
-    
-    AntiBatConn = RunService.Heartbeat:Connect(function()
-        if not AntiBatEnabled or not root or not root.Parent then return end
-
-        local currentChar = player.Character
-        if not currentChar then return end
-
-        -- 1. فحص إذا كان اللاعب يحمل Brainrot أو أي أداة هامة
-        local carryingItem = false
-        for _, child in ipairs(currentChar:GetChildren()) do
-            if child:IsA("Tool") then
-                local n = child.Name:lower()
-                if not n:find("bat") and not n:find("slap") and not n:find("medusa") then
-                    carryingItem = true
-                    break
-                end
-            end
-        end
-
-        -- فحص الإشارات والخصائص الحركية للغنائم
-        if not carryingItem then
-            for attrName, attrValue in pairs(currentChar:GetAttributes()) do
-                local name = attrName:lower()
-                if (name:find("carrying") or name:find("carry") or name:find("stealing") or name:find("hasbrainrot")) and attrValue == true then
-                    carryingItem = true
-                    break
-                end
-            end
-        end
-
-        -- 2. تنفيذ نبض السرعة بحجم 1000 المظبوط مع الحماية من Drop Brainrot
-        local origXZ = Vector3.new(root.Velocity.X, 0, root.Velocity.Z)
-        
-        if carryingItem then
-            -- عند حمل الـ Brainrot: يتم تقليل السرعة النبضية لحماية الغنيمة من فحص السيرفر السريع
-            root.Velocity = Vector3.new(650, root.Velocity.Y, 650)
-            RunService.RenderStepped:Wait()
-            root.Velocity = Vector3.new(origXZ.X, root.Velocity.Y, origXZ.Z)
-        else
-            -- السرعة القياسية المحددة (1000) في الوضع الطبيعي
-            root.Velocity = Vector3.new(1000, root.Velocity.Y, 1000)
-            RunService.RenderStepped:Wait()
-            root.Velocity = Vector3.new(origXZ.X, root.Velocity.Y, origXZ.Z)
-        end
-    end)
-end
-
-local function stopAntiBat()
-    if AntiBatConn then
-        AntiBatConn:Disconnect()
-        AntiBatConn = nil
-    end
-end
-
--- منطق الـ Anti Bat V2 (تشغيل الـ Loadstring الجديد)
+-- منطق الـ Anti Bat V2 (تشغيل الـ Loadstring)
 local function startAntiBatV2()
     if AntiBatV2Connection then return end
     AntiBatV2Enabled = true
@@ -1012,7 +947,7 @@ local function toggleVioletteBatScript(state)
     end
 end
 
--- بناء واجهة المستخدم الرئيسية مع زيادة الطول لاستيعاب الزر الجديد
+-- بناء واجهة المستخدم الرئيسية
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "YoDealsHub"
 screenGui.ResetOnSpawn = false
@@ -1023,8 +958,8 @@ screenGui.Parent = playerGui
 
 local borderWrap = Instance.new("Frame")
 borderWrap.Name = "SquircleBorderWrap"
-borderWrap.Size = UDim2.new(0, 280, 0, 600)
-borderWrap.Position = UDim2.new(0.5, -140, 0.5, -300)
+borderWrap.Size = UDim2.new(0, 280, 0, 550)
+borderWrap.Position = UDim2.new(0.5, -140, 0.5, -275)
 borderWrap.BackgroundColor3 = Color3.new(0.0627451, 0.0156863, 0.0235294)
 borderWrap.BackgroundTransparency = 0.15
 borderWrap.BorderSizePixel = 0
@@ -1146,7 +1081,7 @@ content.Size = UDim2.new(1, -28, 1, -54)
 content.Position = UDim2.new(0, 14, 0, 48)
 content.BackgroundTransparency = 1
 content.BorderSizePixel = 0
-content.CanvasSize = UDim2.new(0, 0, 0, 620)
+content.CanvasSize = UDim2.new(0, 0, 0, 560)
 content.ScrollBarThickness = 2
 content.ZIndex = 13
 content.Parent = mainFrame
@@ -1286,60 +1221,55 @@ local function makeFeatureCard(cardName, text, yOffset, defaultState, callback)
     return card
 end
 
--- إضافة الأزرار بالترتيب في القائمة
+-- إضافة الأزرار المتبقية في القائمة بإعادة تنظيم الأبعاد
 makeFeatureCard("AntiResetCard", "Anti Reset", 0, AntiResetEnabled, function(state)
     AntiResetEnabled = state
     if AntiResetEnabled then startAntiReset() else stopAntiReset() end
 end)
 
-makeFeatureCard("AntiBatCard", "Anti Bat", 58, AntiBatEnabled, function(state)
-    AntiBatEnabled = state
-    if AntiBatEnabled then startAntiBat() else stopAntiBat() end
-end)
-
-makeFeatureCard("AntiBatV2Card", "anti bat v2", 116, AntiBatV2Enabled, function(state)
+makeFeatureCard("AntiBatV2Card", "anti bat v2", 58, AntiBatV2Enabled, function(state)
     AntiBatV2Enabled = state
     if AntiBatV2Enabled then startAntiBatV2() else stopAntiBatV2() end
 end)
 
-makeFeatureCard("AntiMedusaCard", "انتي مادوسه", 174, AntiMedusaEnabled, function(state)
+makeFeatureCard("AntiMedusaCard", "انتي مادوسه", 116, AntiMedusaEnabled, function(state)
     AntiMedusaEnabled = state
     if AntiMedusaEnabled then startAntiMedusa() else stopAntiMedusa() end
 end)
 
-makeFeatureCard("YahyaV2Card", "يحيى في 2", 232, YahyaV2Enabled, function(state)
+makeFeatureCard("YahyaV2Card", "يحيى في 2", 174, YahyaV2Enabled, function(state)
     YahyaV2Enabled = state
     if YahyaV2Enabled then startYahyaV2() else stopYahyaV2() end
 end)
 
-makeFeatureCard("InputSourceCard", "Input Source", 290, InputSourceEnabled, function(state)
+makeFeatureCard("InputSourceCard", "Input Source", 232, InputSourceEnabled, function(state)
     toggleInputSourceUI(state)
 end)
 
-makeFeatureCard("AntiKickCard", "Anti Kick / E01", 348, AntiKickEnabled, function(state)
+makeFeatureCard("AntiKickCard", "Anti Kick / E01", 290, AntiKickEnabled, function(state)
     AntiKickEnabled = state
 end)
 
-makeFeatureCard("InfJumpCard", "Inf Jump (Normal)", 406, InfiniteJumpEnabled, function(state)
+makeFeatureCard("InfJumpCard", "Inf Jump (Normal)", 348, InfiniteJumpEnabled, function(state)
     InfiniteJumpEnabled = state
 end)
 
-makeFeatureCard("InfJumpHoldCard", "Inf Jump (Hold)", 464, InfiniteJumpHoldEnabled, function(state)
+makeFeatureCard("InfJumpHoldCard", "Inf Jump (Hold)", 406, InfiniteJumpHoldEnabled, function(state)
     InfiniteJumpHoldEnabled = state
     if not InfiniteJumpHoldEnabled then IsJumpingHold = false end
 end)
 
-makeFeatureCard("VioletteBatCard", "Violette TP Bat UI", 522, VioletteBatUIEnabled, function(state)
+makeFeatureCard("VioletteBatCard", "Violette TP Bat UI", 464, VioletteBatUIEnabled, function(state)
     toggleVioletteBatScript(state)
 end)
 
 startJumpHoldLoop()
 
 -- تصغير وتكبير الواجهة
-local EXPANDED_SIZE = UDim2.new(0, 280, 0, 600)
+local EXPANDED_SIZE = UDim2.new(0, 280, 0, 550)
 local COLLAPSED_SIZE = UDim2.new(0, 280, 0, 50)
 local EXPANDED_CONTENT_POSITION = UDim2.new(0, 14, 0, 48)
-local COLLAPSED_CONTENT_POSITION = UDim2.new(0, 14, 0, -620)
+local COLLAPSED_CONTENT_POSITION = UDim2.new(0, 14, 0, -560)
 local collapsed = false
 local minimiseBusy = false
 
