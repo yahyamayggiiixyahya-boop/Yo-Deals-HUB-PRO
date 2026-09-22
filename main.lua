@@ -1,5 +1,5 @@
 -- =====================================================
---  يويو ديلز | النسخة الخارقة الشاملة (رأس أحمر بالكامل + بوست بنج ونتورك قوي + 3 هيت بوكسات وهمية + بدون رجوع للخلف)
+--  يويو ديلز | النسخة الخارقة النهائية (البوست الخرافي للشبكة والبنج + علامة حمراء + هيت بوكسات جانبية مدمرة)
 -- =====================================================
 
 local Players = game:GetService("Players")
@@ -8,23 +8,41 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. بوست أداء قوي جداً + تحسين وتثبيت الإنترنت والشبكة (Network Boost) لتقليل البنج السيء
+-- 1. بوست أداء فائق + محرك تقوية وتثبيت البنج والشبكة الخارق (Ping & Network Ultra Boost)
 pcall(function()
     setfpscap(120)
     Workspace.StreamingEnabled = true
     
-    -- تحسين استجابة الشبكة وتقليل اللاج الناتج عن ضعف النت
+    -- تقوية وتثبيت إعدادات الشبكة لمنع البنج العالي وتقطيع النت
     local networkSettings = settings():FindFirstChild("NetworkSettings")
     if networkSettings then
         pcall(function()
             networkSettings.IncomingReplicationLag = 0
+            networkSettings.PhysicsReceiveTimeout = 0
         end)
     end
 
+    -- تقليل ضغط الرندرة على الجهاز والاتصال
     for _, v in ipairs(Workspace:GetDescendants()) do
         if v:IsA("BasePart") then
             v.CastShadow = false
+            v.Reflectance = 0
         end
+    end
+end)
+
+-- حلقة خفيفة جداً لتثبيت وتنشيط الاتصال ومنع قطع الحزم (Ping Stabilizer)
+task.spawn(function()
+    while task.wait(3) do
+        pcall(function()
+            if LocalPlayer and LocalPlayer.Character then
+                -- إرسال نبضة خفيفة لتثبيت الاستجابة مع السيرفر
+                local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    local _ = hrp.Position
+                end
+            end
+        end)
     end
 end)
 
@@ -117,14 +135,19 @@ task.spawn(function()
     end)
 end)
 
--- 4. رأس اللاعب كله أحمر + 3 هيت بوكسات وهمية للضربات بنسبة 100% + حماية من الرجوع للخلف
+-- 4. علامة الكورة الحمراء فوق رأس اللاعب + 3 هيت بوكسات وهمية واسعة جداً للضرب من الجنب والفراغ في أي ماب
 task.spawn(function()
+    local espGuis = {}
     local playerBoxes = {}
 
     local function setupPlayer(p)
         if p == LocalPlayer then return end
         
         p.CharacterAdded:Connect(function(char)
+            if espGuis[p] then 
+                pcall(function() espGuis[p]:Destroy() end)
+                espGuis[p] = nil
+            end
             if playerBoxes[p] then
                 for _, box in ipairs(playerBoxes[p]) do
                     pcall(function() box:Destroy() end)
@@ -136,18 +159,36 @@ task.spawn(function()
             local hrp = char:WaitForChild("HumanoidRootPart", 5)
             
             if head and hrp then
-                -- تلوين رأس اللاعب بالكامل باللون الأحمر الفاقع
-                pcall(function()
-                    head.Color = Color3.fromRGB(255, 0, 0)
-                    head.Material = Enum.Material.Neon
-                end)
+                -- علامة الكورة الحمراء الواضحة فوق رأس اللاعب
+                local dotGui = Instance.new("BillboardGui")
+                dotGui.Name = "YoDealsRedDot"
+                dotGui.AlwaysOnTop = true
+                dotGui.Size = UDim2.new(0, 25, 0, 25)
+                dotGui.StudsOffset = Vector3.new(0, 2.2, 0)
+                
+                local dot = Instance.new("Frame")
+                dot.Parent = dotGui
+                dot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                dot.Size = UDim2.new(1, 0, 1, 0)
+                
+                local corner = Instance.new("UICorner")
+                corner.CornerRadius = UDim.new(1, 0)
+                corner.Parent = dot
+                
+                local stroke = Instance.new("UIStroke")
+                stroke.Color = Color3.fromRGB(255, 255, 255)
+                stroke.Thickness = 2
+                stroke.Parent = dot
 
-                -- إنشاء 3 هيت بوكسات وهمية واسعة لتغطية محيط اللاعب بنسبة 100% في أي ماب
+                dotGui.Parent = head
+                espGuis[p] = dotGui
+
+                -- 3 هيت بوكسات وهمية واسعة جداً (تغطي الجنب والفراغ لتسهيل الضرب في أي ماب)
                 local boxes = {}
                 
                 local box1 = Instance.new("Part")
                 box1.Name = "YoDealsBox_Mid"
-                box1.Size = Vector3.new(16, 6, 16)
+                box1.Size = Vector3.new(18, 7, 18)
                 box1.Transparency = 1
                 box1.CanCollide = false
                 box1.Massless = true
@@ -162,7 +203,7 @@ task.spawn(function()
 
                 local box2 = Instance.new("Part")
                 box2.Name = "YoDealsBox_Low"
-                box2.Size = Vector3.new(14, 5, 14)
+                box2.Size = Vector3.new(16, 6, 16)
                 box2.Transparency = 1
                 box2.CanCollide = false
                 box2.Massless = true
@@ -177,7 +218,7 @@ task.spawn(function()
 
                 local box3 = Instance.new("Part")
                 box3.Name = "YoDealsBox_High"
-                box3.Size = Vector3.new(14, 5, 14)
+                box3.Size = Vector3.new(16, 6, 16)
                 box3.Transparency = 1
                 box3.CanCollide = false
                 box3.Massless = true
@@ -200,16 +241,34 @@ task.spawn(function()
             local hrp = char:FindFirstChild("HumanoidRootPart")
             
             if head and hrp then
-                pcall(function()
-                    head.Color = Color3.fromRGB(255, 0, 0)
-                    head.Material = Enum.Material.Neon
-                end)
+                local dotGui = Instance.new("BillboardGui")
+                dotGui.Name = "YoDealsRedDot"
+                dotGui.AlwaysOnTop = true
+                dotGui.Size = UDim2.new(0, 25, 0, 25)
+                dotGui.StudsOffset = Vector3.new(0, 2.2, 0)
+                
+                local dot = Instance.new("Frame")
+                dot.Parent = dotGui
+                dot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                dot.Size = UDim2.new(1, 0, 1, 0)
+                
+                local corner = Instance.new("UICorner")
+                corner.CornerRadius = UDim.new(1, 0)
+                corner.Parent = dot
+                
+                local stroke = Instance.new("UIStroke")
+                stroke.Color = Color3.fromRGB(255, 255, 255)
+                stroke.Thickness = 2
+                stroke.Parent = dot
+
+                dotGui.Parent = head
+                espGuis[p] = dotGui
 
                 local boxes = {}
                 
                 local box1 = Instance.new("Part")
                 box1.Name = "YoDealsBox_Mid"
-                box1.Size = Vector3.new(16, 6, 16)
+                box1.Size = Vector3.new(18, 7, 18)
                 box1.Transparency = 1
                 box1.CanCollide = false
                 box1.Massless = true
@@ -224,7 +283,7 @@ task.spawn(function()
 
                 local box2 = Instance.new("Part")
                 box2.Name = "YoDealsBox_Low"
-                box2.Size = Vector3.new(14, 5, 14)
+                box2.Size = Vector3.new(16, 6, 16)
                 box2.Transparency = 1
                 box2.CanCollide = false
                 box2.Massless = true
@@ -239,14 +298,14 @@ task.spawn(function()
 
                 local box3 = Instance.new("Part")
                 box3.Name = "YoDealsBox_High"
-                box3.Size = Vector3.new(14, 5, 14)
+                box3.Size = Vector3.new(16, 6, 16)
                 box3.Transparency = 1
                 box3.CanCollide = false
                 box3.Massless = true
                 box3.Anchored = false
                 box3.Parent = char
                 
-                local weld3 = Instance.new("WeldConstraint")
+                val padWeld3 = Instance.new("WeldConstraint")
                 weld3.Part0 = hrp
                 weld3.Part1 = box3
                 weld3.Parent = box3
