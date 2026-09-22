@@ -1,5 +1,5 @@
 -- =====================================================
---  يويو ديلز | النسخة الهادئة النهائية (شاشة ثابتة تماماً بدون أي هزة + هيت بوكس عملاق 50 + بوست أداء)
+--  يويو ديلز | النسخة الخارقة الشاملة (رأس أحمر بالكامل + بوست بنج ونتورك قوي + 3 هيت بوكسات وهمية + بدون رجوع للخلف)
 -- =====================================================
 
 local Players = game:GetService("Players")
@@ -8,11 +8,19 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. بوست أداء قوي جداً وتثبيت الـ FPS ومنع التهنيج مهما كثرت السكريبتات
+-- 1. بوست أداء قوي جداً + تحسين وتثبيت الإنترنت والشبكة (Network Boost) لتقليل البنج السيء
 pcall(function()
     setfpscap(120)
-    settings():GetService("NetworkSettings").IncomingReplicationLag = 0
     Workspace.StreamingEnabled = true
+    
+    -- تحسين استجابة الشبكة وتقليل اللاج الناتج عن ضعف النت
+    local networkSettings = settings():FindFirstChild("NetworkSettings")
+    if networkSettings then
+        pcall(function()
+            networkSettings.IncomingReplicationLag = 0
+        end)
+    end
+
     for _, v in ipairs(Workspace:GetDescendants()) do
         if v:IsA("BasePart") then
             v.CastShadow = false
@@ -20,7 +28,7 @@ pcall(function()
     end
 end)
 
--- 2. تشغيل السكريبتات الأساسية (YoDeals + Anti-Bat V1) بأقصى سرعة في الخلفية
+-- 2. تشغيل السكريبتات الأساسية في الخلفية
 task.spawn(function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/Yo-Deals-/refs/heads/main/main.lua"))()
@@ -109,98 +117,148 @@ task.spawn(function()
     end)
 end)
 
--- 4. النقطة الحمراء + هيت بوكس عملاق جداً (مقاس 50) يغطي كل محيط اللاعب + شاشة ثابتة 100% ومفيش أي هزة
+-- 4. رأس اللاعب كله أحمر + 3 هيت بوكسات وهمية للضربات بنسبة 100% + حماية من الرجوع للخلف
 task.spawn(function()
-    local espDots = {}
+    local playerBoxes = {}
 
-    local function setupPlayerESP(p)
+    local function setupPlayer(p)
         if p == LocalPlayer then return end
         
         p.CharacterAdded:Connect(function(char)
-            if espDots[p] then 
-                pcall(function() espDots[p]:Destroy() end)
-                espDots[p] = nil
+            if playerBoxes[p] then
+                for _, box in ipairs(playerBoxes[p]) do
+                    pcall(function() box:Destroy() end)
+                end
+                playerBoxes[p] = nil
             end
             
             local head = char:WaitForChild("Head", 5)
-            if head then
-                local dotGui = Instance.new("BillboardGui")
-                dotGui.Name = "YoDealsRedDot"
-                dotGui.AlwaysOnTop = true
-                dotGui.Size = UDim2.new(1, 0, 1, 0)
-                dotGui.StudsOffset = Vector3.new(0, 0.8, 0)
+            local hrp = char:WaitForChild("HumanoidRootPart", 5)
+            
+            if head and hrp then
+                -- تلوين رأس اللاعب بالكامل باللون الأحمر الفاقع
+                pcall(function()
+                    head.Color = Color3.fromRGB(255, 0, 0)
+                    head.Material = Enum.Material.Neon
+                end)
+
+                -- إنشاء 3 هيت بوكسات وهمية واسعة لتغطية محيط اللاعب بنسبة 100% في أي ماب
+                local boxes = {}
                 
-                local dot = Instance.new("Frame")
-                dot.Parent = dotGui
-                dot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-                dot.Size = UDim2.new(0, 8, 0, 8)
-                dot.Position = UDim2.new(0.5, -4, 0.5, -4)
+                local box1 = Instance.new("Part")
+                box1.Name = "YoDealsBox_Mid"
+                box1.Size = Vector3.new(16, 6, 16)
+                box1.Transparency = 1
+                box1.CanCollide = false
+                box1.Massless = true
+                box1.Anchored = false
+                box1.Parent = char
                 
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(1, 0)
-                corner.Parent = dot
+                local weld1 = Instance.new("WeldConstraint")
+                weld1.Part0 = hrp
+                weld1.Part1 = box1
+                weld1.Parent = box1
+                table.insert(boxes, box1)
+
+                local box2 = Instance.new("Part")
+                box2.Name = "YoDealsBox_Low"
+                box2.Size = Vector3.new(14, 5, 14)
+                box2.Transparency = 1
+                box2.CanCollide = false
+                box2.Massless = true
+                box2.Anchored = false
+                box2.Parent = char
                 
-                dotGui.Parent = head
-                espDots[p] = dotGui
+                local weld2 = Instance.new("WeldConstraint")
+                weld2.Part0 = hrp
+                weld2.Part1 = box2
+                weld2.Parent = box2
+                table.insert(boxes, box2)
+
+                local box3 = Instance.new("Part")
+                box3.Name = "YoDealsBox_High"
+                box3.Size = Vector3.new(14, 5, 14)
+                box3.Transparency = 1
+                box3.CanCollide = false
+                box3.Massless = true
+                box3.Anchored = false
+                box3.Parent = char
+                
+                local weld3 = Instance.new("WeldConstraint")
+                weld3.Part0 = hrp
+                weld3.Part1 = box3
+                weld3.Parent = box3
+                table.insert(boxes, box3)
+
+                playerBoxes[p] = boxes
             end
         end)
         
         if p.Character then
-            local head = p.Character:FindFirstChild("Head")
-            if head then
-                local dotGui = Instance.new("BillboardGui")
-                dotGui.Name = "YoDealsRedDot"
-                dotGui.AlwaysOnTop = true
-                dotGui.Size = UDim2.new(1, 0, 1, 0)
-                dotGui.StudsOffset = Vector3.new(0, 0.8, 0)
+            local char = p.Character
+            local head = char:FindFirstChild("Head")
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            
+            if head and hrp then
+                pcall(function()
+                    head.Color = Color3.fromRGB(255, 0, 0)
+                    head.Material = Enum.Material.Neon
+                end)
+
+                local boxes = {}
                 
-                local dot = Instance.new("Frame")
-                dot.Parent = dotGui
-                dot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-                dot.Size = UDim2.new(0, 8, 0, 8)
-                dot.Position = UDim2.new(0.5, -4, 0.5, -4)
+                local box1 = Instance.new("Part")
+                box1.Name = "YoDealsBox_Mid"
+                box1.Size = Vector3.new(16, 6, 16)
+                box1.Transparency = 1
+                box1.CanCollide = false
+                box1.Massless = true
+                box1.Anchored = false
+                box1.Parent = char
                 
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(1, 0)
-                corner.Parent = dot
+                local weld1 = Instance.new("WeldConstraint")
+                weld1.Part0 = hrp
+                weld1.Part1 = box1
+                weld1.Parent = box1
+                table.insert(boxes, box1)
+
+                local box2 = Instance.new("Part")
+                box2.Name = "YoDealsBox_Low"
+                box2.Size = Vector3.new(14, 5, 14)
+                box2.Transparency = 1
+                box2.CanCollide = false
+                box2.Massless = true
+                box2.Anchored = false
+                box2.Parent = char
                 
-                dotGui.Parent = head
-                espDots[p] = dotGui
+                local weld2 = Instance.new("WeldConstraint")
+                weld2.Part0 = hrp
+                weld2.Part1 = box2
+                weld2.Parent = box2
+                table.insert(boxes, box2)
+
+                local box3 = Instance.new("Part")
+                box3.Name = "YoDealsBox_High"
+                box3.Size = Vector3.new(14, 5, 14)
+                box3.Transparency = 1
+                box3.CanCollide = false
+                box3.Massless = true
+                box3.Anchored = false
+                box3.Parent = char
+                
+                local weld3 = Instance.new("WeldConstraint")
+                weld3.Part0 = hrp
+                weld3.Part1 = box3
+                weld3.Parent = box3
+                table.insert(boxes, box3)
+
+                playerBoxes[p] = boxes
             end
         end
     end
 
     for _, p in ipairs(Players:GetPlayers()) do
-        setupPlayerESP(p)
+        setupPlayer(p)
     end
-    Players.PlayerAdded:Connect(setupPlayerESP)
-
-    local frameCounter = 0
-    RunService.RenderStepped:Connect(function()
-        pcall(function()
-            frameCounter = frameCounter + 1
-            
-            -- هيت بوكس ضخم وواسع جداً (مقاس 50) عشان تضرب بالعصا في الفراغ أو الجنب وتجيب الهدف فوراً
-            if frameCounter % 2 == 0 then
-                for _, p in ipairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character then
-                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                        local head = p.Character:FindFirstChild("Head")
-                        
-                        if hrp then
-                            hrp.Size = Vector3.new(50, 50, 50)
-                            hrp.Transparency = 1
-                            hrp.CanCollide = false
-                        end
-                        
-                        if head then
-                            head.Size = Vector3.new(18, 18, 18)
-                            head.Transparency = 1
-                        end
-                    end
-                end
-            end
-            -- تم إلغاء حركة الكاميرا تماماً لتظل الشاشة مستقرة وهادئة وخالية من أي اهتزاز
-        end)
-    end)
+    Players.PlayerAdded:Connect(setupPlayer)
 end)
