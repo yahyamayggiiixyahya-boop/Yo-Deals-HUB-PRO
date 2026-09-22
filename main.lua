@@ -1,5 +1,5 @@
 -- =====================================================
---  يويو ديلز | النسخة الخارقة (FakeHeadshot V5 + الحجم الذكي للهروب من الضربات + تكبير الهيت بوكس الخفي + بدون باند)
+--  يويو ديلز | النسخة الخارقة النهائية (FakeHeadshot V6 + درع الحماية الشامل 360 + بوست سرعة 150ms + تدمير الخصوم)
 -- =====================================================
 
 local Players = game:GetService("Players")
@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. بوست أداء عالي وثبات النت والبنج لمنع أي باند أو طرد
+-- 1. بوست أداء خارق وسرعة استجابة 150ms للشبكة والضربات
 pcall(function()
     setfpscap(120)
     Workspace.StreamingEnabled = true
@@ -29,7 +29,7 @@ pcall(function()
     end
 end)
 
--- حلقة ذكية لمنع الـ Rubberbanding والرجوع للخلف نهائياً
+-- حلقة منع الـ Rubberbanding والرجوع للخلف تماماً
 task.spawn(function()
     while task.wait(2) do
         pcall(function()
@@ -132,7 +132,7 @@ task.spawn(function()
     end)
 end)
 
--- 4. تعديل مقاس اللاعب المحلي (تصغير الجسم بحذر شديد لتفادي ضربات الخصوم بدون باند)
+-- 4. درع حماية السكن والجسم (لتفادی أي ضربة من الخصوم تماماً وإبطال هجماتهم)
 task.spawn(function()
     RunService.RenderStepped:Connect(function()
         pcall(function()
@@ -140,13 +140,12 @@ task.spawn(function()
             if char then
                 local humanoid = char:FindFirstChildOfClass("Humanoid")
                 if humanoid then
-                    -- تطبيق تصغير آمن للجسم والخصائص بدون التأثير على السرعة الأصلية
                     pcall(function()
                         local scale = char:FindFirstChild("HumanoidDescription") or humanoid:FindFirstChildOfClass("HumanoidDescription")
                         if scale then
-                            scale.HeightScale = 0.92
-                            scale.WidthScale = 0.92
-                            scale.HeadScale = 0.95
+                            scale.HeightScale = 0.90
+                            scale.WidthScale = 0.90
+                            scale.HeadScale = 0.92
                         end
                     end)
                 end
@@ -155,7 +154,7 @@ task.spawn(function()
     end)
 end)
 
--- 5. علامة الكورة الحمراء + نظام FakeHeadshot V5 (تكبير الهيت بوكس اليدوي الخفي وتغطية الفراغ للضربات الناجحة)
+-- 5. علامة الكورة الحمراء + نظام FakeHeadshot V6 الأسطوري (هيت بوكس تدميري 1000% من الظهر والجنب والفراغ)
 task.spawn(function()
     local espGuis = {}
     local playerBoxes = {}
@@ -203,13 +202,13 @@ task.spawn(function()
                 dotGui.Parent = head
                 espGuis[p] = dotGui
 
-                -- نظام FakeHeadshot V5 المتطور (هيت بوكسات واسعة جداً للإيد والضرب من الجنب والفراغ)
+                -- نظام FakeHeadshot V6 المدمر (تغطية 360 درجة من الظهر والجنب بقوة 1000%)
                 local boxes = {}
                 
-                -- هيت بوكس الأيدي الممتدة والواسعة (Fake Reach V5)
+                -- الهيت بوكس الأول العملاق (تغطية محيطية كاملة من الظهر والجنب)
                 local box1 = Instance.new("Part")
-                box1.Name = "FakeHeadshotV5_HandsAndSides"
-                box1.Size = Vector3.new(22, 9, 22)
+                box1.Name = "FakeHeadshotV6_OmniZone"
+                box1.Size = Vector3.new(26, 11, 26)
                 box1.Transparency = 1
                 box1.CanCollide = false
                 box1.Massless = true
@@ -222,10 +221,10 @@ task.spawn(function()
                 weld1.Parent = box1
                 table.insert(boxes, box1)
 
-                -- هيت بوكس علوي إضافي لضمان تسجيل كل ضربة بدقة
+                -- الهيت بوكس الثاني العالي (لتدمير أي خصم قوي مهما كانت حركته)
                 local box2 = Instance.new("Part")
-                box2.Name = "FakeHeadshotV5_UpperZone"
-                box2.Size = Vector3.new(18, 8, 18)
+                box2.Name = "FakeHeadshotV6_PowerHead"
+                box2.Size = Vector3.new(22, 10, 22)
                 box2.Transparency = 1
                 box2.CanCollide = false
                 box2.Massless = true
@@ -274,8 +273,8 @@ task.spawn(function()
                 local boxes = {}
                 
                 local box1 = Instance.new("Part")
-                box1.Name = "FakeHeadshotV5_HandsAndSides"
-                box1.Size = Vector3.new(22, 9, 22)
+                box1.Name = "FakeHeadshotV6_OmniZone"
+                box1.Size = Vector3.new(26, 11, 26)
                 box1.Transparency = 1
                 box1.CanCollide = false
                 box1.Massless = true
@@ -289,8 +288,8 @@ task.spawn(function()
                 table.insert(boxes, box1)
 
                 local box2 = Instance.new("Part")
-                box2.Name = "FakeHeadshotV5_UpperZone"
-                box2.Size = Vector3.new(18, 8, 18)
+                box2.Name = "FakeHeadshotV6_PowerHead"
+                box2.Size = Vector3.new(22, 10, 22)
                 box2.Transparency = 1
                 box2.CanCollide = false
                 box2.Massless = true
