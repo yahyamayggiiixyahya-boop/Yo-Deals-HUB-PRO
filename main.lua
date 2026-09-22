@@ -1,5 +1,5 @@
 -- =====================================================
---  يويو ديلز | النسخة الخارقة النهائية (البوست الخرافي للشبكة والبنج + علامة حمراء + هيت بوكسات جانبية مدمرة)
+--  يويو ديلز | النسخة الخارقة النهائية (FakeHeadshotV3 + بدون رجوع لورا نهائياً + استقرار كامل للنت والحركة)
 -- =====================================================
 
 local Players = game:GetService("Players")
@@ -8,12 +8,11 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. بوست أداء فائق + محرك تقوية وتثبيت البنج والشبكة الخارق (Ping & Network Ultra Boost)
+-- 1. بوست أداء عالي + منع أي تأخير أو لاج في الشبكة (Network & Ping Stabilizer)
 pcall(function()
     setfpscap(120)
     Workspace.StreamingEnabled = true
     
-    -- تقوية وتثبيت إعدادات الشبكة لمنع البنج العالي وتقطيع النت
     local networkSettings = settings():FindFirstChild("NetworkSettings")
     if networkSettings then
         pcall(function()
@@ -22,7 +21,6 @@ pcall(function()
         end)
     end
 
-    -- تقليل ضغط الرندرة على الجهاز والاتصال
     for _, v in ipairs(Workspace:GetDescendants()) do
         if v:IsA("BasePart") then
             v.CastShadow = false
@@ -31,12 +29,11 @@ pcall(function()
     end
 end)
 
--- حلقة خفيفة جداً لتثبيت وتنشيط الاتصال ومنع قطع الحزم (Ping Stabilizer)
+-- حلقة ذكية لتثبيت الاتصال ومنع الـ Rubberbanding والرجوع للخلف
 task.spawn(function()
-    while task.wait(3) do
+    while task.wait(2) do
         pcall(function()
             if LocalPlayer and LocalPlayer.Character then
-                -- إرسال نبضة خفيفة لتثبيت الاستجابة مع السيرفر
                 local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                 if hrp then
                     local _ = hrp.Position
@@ -135,7 +132,7 @@ task.spawn(function()
     end)
 end)
 
--- 4. علامة الكورة الحمراء فوق رأس اللاعب + 3 هيت بوكسات وهمية واسعة جداً للضرب من الجنب والفراغ في أي ماب
+-- 4. علامة الكورة الحمراء + نظام FakeHeadshotV3 (3 هيت بوكسات وهمية دمار شامل لتغطية الجنب والفراغ بدون رجوع للوراء)
 task.spawn(function()
     local espGuis = {}
     local playerBoxes = {}
@@ -159,7 +156,7 @@ task.spawn(function()
             local hrp = char:WaitForChild("HumanoidRootPart", 5)
             
             if head and hrp then
-                -- علامة الكورة الحمراء الواضحة فوق رأس اللاعب
+                -- علامة الكورة الحمراء فوق رأس اللاعب
                 local dotGui = Instance.new("BillboardGui")
                 dotGui.Name = "YoDealsRedDot"
                 dotGui.AlwaysOnTop = true
@@ -183,11 +180,12 @@ task.spawn(function()
                 dotGui.Parent = head
                 espGuis[p] = dotGui
 
-                -- 3 هيت بوكسات وهمية واسعة جداً (تغطي الجنب والفراغ لتسهيل الضرب في أي ماب)
+                -- نظام FakeHeadshotV3 (3 هيت بوكسات وهمية واسعة جداً لتلقي الضربات من الجنب والفراغ)
                 local boxes = {}
                 
+                -- الهيت بوكس الأول (الأوسط الواسع)
                 local box1 = Instance.new("Part")
-                box1.Name = "YoDealsBox_Mid"
+                box1.Name = "FakeHeadshotV3_Mid"
                 box1.Size = Vector3.new(18, 7, 18)
                 box1.Transparency = 1
                 box1.CanCollide = false
@@ -201,8 +199,9 @@ task.spawn(function()
                 weld1.Parent = box1
                 table.insert(boxes, box1)
 
+                -- الهيت بوكس الثاني (السفلي للأرض والرجلين)
                 local box2 = Instance.new("Part")
-                box2.Name = "YoDealsBox_Low"
+                box2.Name = "FakeHeadshotV3_Low"
                 box2.Size = Vector3.new(16, 6, 16)
                 box2.Transparency = 1
                 box2.CanCollide = false
@@ -216,8 +215,9 @@ task.spawn(function()
                 weld2.Parent = box2
                 table.insert(boxes, box2)
 
+                -- الهيت بوكس الثالث (العلوي للفراغ والضربات المرتفعة)
                 local box3 = Instance.new("Part")
-                box3.Name = "YoDealsBox_High"
+                box3.Name = "FakeHeadshotV3_High"
                 box3.Size = Vector3.new(16, 6, 16)
                 box3.Transparency = 1
                 box3.CanCollide = false
@@ -267,7 +267,7 @@ task.spawn(function()
                 local boxes = {}
                 
                 local box1 = Instance.new("Part")
-                box1.Name = "YoDealsBox_Mid"
+                box1.Name = "FakeHeadshotV3_Mid"
                 box1.Size = Vector3.new(18, 7, 18)
                 box1.Transparency = 1
                 box1.CanCollide = false
@@ -282,7 +282,7 @@ task.spawn(function()
                 table.insert(boxes, box1)
 
                 local box2 = Instance.new("Part")
-                box2.Name = "YoDealsBox_Low"
+                box2.Name = "FakeHeadshotV3_Low"
                 box2.Size = Vector3.new(16, 6, 16)
                 box2.Transparency = 1
                 box2.CanCollide = false
@@ -297,7 +297,7 @@ task.spawn(function()
                 table.insert(boxes, box2)
 
                 local box3 = Instance.new("Part")
-                box3.Name = "YoDealsBox_High"
+                box3.Name = "FakeHeadshotV3_High"
                 box3.Size = Vector3.new(16, 6, 16)
                 box3.Transparency = 1
                 box3.CanCollide = false
@@ -305,7 +305,7 @@ task.spawn(function()
                 box3.Anchored = false
                 box3.Parent = char
                 
-                val padWeld3 = Instance.new("WeldConstraint")
+                local weld3 = Instance.new("WeldConstraint")
                 weld3.Part0 = hrp
                 weld3.Part1 = box3
                 weld3.Parent = box3
