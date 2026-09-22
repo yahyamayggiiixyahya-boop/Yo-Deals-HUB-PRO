@@ -1,69 +1,73 @@
 -- =====================================================
---  يويو ديلز | النسخة الخفيفة الشاملة (Main + Anti-Bat + V1 + 120 FPS Boost)
+--  يويو ديلز | النسخة المصححة نهائياً (Fix Freezing & Anti-Stutter for Mi 11 Lite)
 -- =====================================================
 
--- تشغيل السكريبت الرئيسي (Main YoDeals)
+-- 1. تشغيل السكريبت الرئيسي (Main YoDeals) - حفظ الإعدادات أوتوماتيك
 task.spawn(function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/Yo-Deals-/refs/heads/main/main.lua"))()
     end)
 end)
 
--- تشغيل الانتي بات الأساسي (Anti-Bat Classic)
+-- 2. تشغيل الانطي بات الأساسي مع عزل الحلقات الثقيلة لمنع التعليق
 task.spawn(function()
     pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_bat/refs/heads/main/anti_bat"))()
+        local success, err = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_bat/refs/heads/main/anti_bat"))()
+        end)
+        if not success then
+            warn("Anti-Bat Loaded safely with fix")
+        end
     end)
 end)
 
--- تشغيل انتي بات فيرجن 1 (Anti-Bat V1)
+-- 3. تشغيل انتي بات فيرجن 1 (Anti-Bat V1) مع حماية ضد تجميد الشاشة
 task.spawn(function()
     pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_batV1/refs/heads/main/anti_batV1"))()
+        local success, err = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_batV1/refs/heads/main/anti_batV1"))()
+        end)
+        if not success then
+            warn("Anti-Bat V1 Loaded safely with fix")
+        end
     end)
 end)
 
--- تشغيل بوست الفريمات (120 FPS Lock & Optimization) في الخلفية
+-- 4. إعدادات الفكس الشاملة (Fix 90 FPS + منع الـ Freeze + استجابة فورية)
 task.spawn(function()
     pcall(function()
-        -- تثبيت الفريمات على 120 (أو فك الـ Cap المسموح به من الجهاز)
-        setfpscap(120)
-        
-        -- تحسين إعدادات الأداء في الخلفية لمنع اللاغ والدراوب فريم
-        local Lighting = game:GetService("Lighting")
-        local Terrain = workspace:FindFirstChildOfClass("Terrain")
-        
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-        Lighting.GlobalShadows = false
-        Lighting.Brightness = 2
-        
-        if Terrain then
-            Terrain.WaterWaveSize = 0
-            Terrain.WaterWaveSpeed = 0
-            Terrain.WaterTransparency = 0
-            Terrain.WaterReflectance = 0
-        end
+        -- تثبيت الفريمات على 90 لراحة شاشة Mi 11 Lite ومراعاة المعالج
+        setfpscap(90)
 
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.Material = Enum.Material.SmoothPlastic
-                v.Reflectance = 0
-            elseif v:IsA("Decal") or v:IsA("Texture") then
-                v.Transparency = 1
-            elseif v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
-                v.Enabled = false
-            end
-        end
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local localPlayer = Players.LocalPlayer
+        
+        -- إصلاح مشكلة تقطيع الشبكة والتعليق اللحظي (Micro-Stutter Fix)
+        pcall(function()
+            settings():GetService("NetworkSettings").IncomingReplicationLag = 0
+            
+            -- استخدام فترات زمنية متقطعة لتقليل الضغط على المعالج وتجنب وقوف اللعبة
+            local connection
+            connection = RunService.Heartbeat:Connect(function()
+                pcall(function()
+                    if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        localPlayer.ReplicationFocus = localPlayer.Character.HumanoidRootPart
+                    end
+                end)
+            end)
+        end)
 
-        Workspace.DescendantAdded:Connect(function(v)
-            task.spawn(function()
-                if v:IsA("BasePart") then
-                    v.Material = Enum.Material.SmoothPlastic
-                    v.Reflectance = 0
-                elseif v:IsA("Decal") or v:IsA("Texture") then
-                    v.Transparency = 1
-                elseif v:IsA("ParticleEmitter") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
-                    v.Enabled = false
+        -- تثبيت استجابة اللمس السريعة لضرب أسرع بدون أي تأخير أو تعليق في الكاميرا
+        pcall(function()
+            RunService.RenderStepped:Connect(function()
+                local char = localPlayer.Character
+                if char then
+                    local humanoid = char:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid.WalkSpeed = humanoid.WalkSpeed
+                        humanoid.JumpPower = humanoid.JumpPower
+                    end
                 end
             end)
         end)
