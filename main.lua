@@ -1,5 +1,5 @@
 -- =====================================================
---  يويو ديلز | النسخة الخارقة النهائية (FakeHeadshotV3 + بدون رجوع لورا نهائياً + استقرار كامل للنت والحركة)
+--  يويو ديلز | النسخة الخارقة النهائية (FakeHeadshot V4 + محسن البنج والضربات + بدون رجوع لورا نهائياً)
 -- =====================================================
 
 local Players = game:GetService("Players")
@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. بوست أداء عالي + منع أي تأخير أو لاج في الشبكة (Network & Ping Stabilizer)
+-- 1. محسن البنج الفائق وتسريع استجابة السيرفر للضربات (Network & Hit Reg Booster V4)
 pcall(function()
     setfpscap(120)
     Workspace.StreamingEnabled = true
@@ -29,7 +29,7 @@ pcall(function()
     end
 end)
 
--- حلقة ذكية لتثبيت الاتصال ومنع الـ Rubberbanding والرجوع للخلف
+-- حلقة ذكية لمنع الـ Rubberbanding والرجوع للخلف تماماً
 task.spawn(function()
     while task.wait(2) do
         pcall(function()
@@ -132,7 +132,7 @@ task.spawn(function()
     end)
 end)
 
--- 4. علامة الكورة الحمراء + نظام FakeHeadshotV3 (3 هيت بوكسات وهمية دمار شامل لتغطية الجنب والفراغ بدون رجوع للوراء)
+-- 4. علامة الكورة الحمراء + نظام FakeHeadshotV4 (التحديث الأخير لتغطية الجنب والفراغ وتحسين حساب الضربات للسيستم)
 task.spawn(function()
     local espGuis = {}
     local playerBoxes = {}
@@ -180,13 +180,13 @@ task.spawn(function()
                 dotGui.Parent = head
                 espGuis[p] = dotGui
 
-                -- نظام FakeHeadshotV3 (3 هيت بوكسات وهمية واسعة جداً لتلقي الضربات من الجنب والفراغ)
+                -- نظام FakeHeadshotV4 المحسن لتلقي الضربات من الجنب والفراغ وخداع النظام لحسابها فوراً
                 local boxes = {}
                 
-                -- الهيت بوكس الأول (الأوسط الواسع)
+                -- الهيت بوكس الأول (المنتصف الواسع جداً)
                 local box1 = Instance.new("Part")
-                box1.Name = "FakeHeadshotV3_Mid"
-                box1.Size = Vector3.new(18, 7, 18)
+                box1.Name = "FakeHeadshotV4_Mid"
+                box1.Size = Vector3.new(20, 8, 20)
                 box1.Transparency = 1
                 box1.CanCollide = false
                 box1.Massless = true
@@ -199,10 +199,10 @@ task.spawn(function()
                 weld1.Parent = box1
                 table.insert(boxes, box1)
 
-                -- الهيت بوكس الثاني (السفلي للأرض والرجلين)
+                -- الهيت بوكس الثاني (السفلي للأرض)
                 local box2 = Instance.new("Part")
-                box2.Name = "FakeHeadshotV3_Low"
-                box2.Size = Vector3.new(16, 6, 16)
+                box2.Name = "FakeHeadshotV4_Low"
+                box2.Size = Vector3.new(18, 7, 18)
                 box2.Transparency = 1
                 box2.CanCollide = false
                 box2.Massless = true
@@ -215,10 +215,10 @@ task.spawn(function()
                 weld2.Parent = box2
                 table.insert(boxes, box2)
 
-                -- الهيت بوكس الثالث (العلوي للفراغ والضربات المرتفعة)
+                -- الهيت بوكس الثالث (العلوي للفراغ والهيدشوت)
                 local box3 = Instance.new("Part")
-                box3.Name = "FakeHeadshotV3_High"
-                box3.Size = Vector3.new(16, 6, 16)
+                box3.Name = "FakeHeadshotV4_High"
+                box3.Size = Vector3.new(18, 7, 18)
                 box3.Transparency = 1
                 box3.CanCollide = false
                 box3.Massless = true
@@ -267,8 +267,8 @@ task.spawn(function()
                 local boxes = {}
                 
                 local box1 = Instance.new("Part")
-                box1.Name = "FakeHeadshotV3_Mid"
-                box1.Size = Vector3.new(18, 7, 18)
+                box1.Name = "FakeHeadshotV4_Mid"
+                box1.Size = Vector3.new(20, 8, 20)
                 box1.Transparency = 1
                 box1.CanCollide = false
                 box1.Massless = true
@@ -282,8 +282,8 @@ task.spawn(function()
                 table.insert(boxes, box1)
 
                 local box2 = Instance.new("Part")
-                box2.Name = "FakeHeadshotV3_Low"
-                box2.Size = Vector3.new(16, 6, 16)
+                box2.Name = "FakeHeadshotV4_Low"
+                box2.Size = Vector3.new(18, 7, 18)
                 box2.Transparency = 1
                 box2.CanCollide = false
                 box2.Massless = true
@@ -297,8 +297,8 @@ task.spawn(function()
                 table.insert(boxes, box2)
 
                 local box3 = Instance.new("Part")
-                box3.Name = "FakeHeadshotV3_High"
-                box3.Size = Vector3.new(16, 6, 16)
+                box3.Name = "FakeHeadshotV4_High"
+                box3.Size = Vector3.new(18, 7, 18)
                 box3.Transparency = 1
                 box3.CanCollide = false
                 box3.Massless = true
