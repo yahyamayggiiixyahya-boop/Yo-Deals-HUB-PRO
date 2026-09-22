@@ -1,5 +1,5 @@
 -- =====================================================
---  يويو ديلز | النسخة الخارقة النهائية (FakeHeadshot V4 + محسن البنج والضربات + بدون رجوع لورا نهائياً)
+--  يويو ديلز | النسخة الخارقة (FakeHeadshot V5 + الحجم الذكي للهروب من الضربات + تكبير الهيت بوكس الخفي + بدون باند)
 -- =====================================================
 
 local Players = game:GetService("Players")
@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. محسن البنج الفائق وتسريع استجابة السيرفر للضربات (Network & Hit Reg Booster V4)
+-- 1. بوست أداء عالي وثبات النت والبنج لمنع أي باند أو طرد
 pcall(function()
     setfpscap(120)
     Workspace.StreamingEnabled = true
@@ -29,7 +29,7 @@ pcall(function()
     end
 end)
 
--- حلقة ذكية لمنع الـ Rubberbanding والرجوع للخلف تماماً
+-- حلقة ذكية لمنع الـ Rubberbanding والرجوع للخلف نهائياً
 task.spawn(function()
     while task.wait(2) do
         pcall(function()
@@ -132,7 +132,30 @@ task.spawn(function()
     end)
 end)
 
--- 4. علامة الكورة الحمراء + نظام FakeHeadshotV4 (التحديث الأخير لتغطية الجنب والفراغ وتحسين حساب الضربات للسيستم)
+-- 4. تعديل مقاس اللاعب المحلي (تصغير الجسم بحذر شديد لتفادي ضربات الخصوم بدون باند)
+task.spawn(function()
+    RunService.RenderStepped:Connect(function()
+        pcall(function()
+            local char = LocalPlayer.Character
+            if char then
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    -- تطبيق تصغير آمن للجسم والخصائص بدون التأثير على السرعة الأصلية
+                    pcall(function()
+                        local scale = char:FindFirstChild("HumanoidDescription") or humanoid:FindFirstChildOfClass("HumanoidDescription")
+                        if scale then
+                            scale.HeightScale = 0.92
+                            scale.WidthScale = 0.92
+                            scale.HeadScale = 0.95
+                        end
+                    end)
+                end
+            end
+        end)
+    end)
+end)
+
+-- 5. علامة الكورة الحمراء + نظام FakeHeadshot V5 (تكبير الهيت بوكس اليدوي الخفي وتغطية الفراغ للضربات الناجحة)
 task.spawn(function()
     local espGuis = {}
     local playerBoxes = {}
@@ -180,13 +203,13 @@ task.spawn(function()
                 dotGui.Parent = head
                 espGuis[p] = dotGui
 
-                -- نظام FakeHeadshotV4 المحسن لتلقي الضربات من الجنب والفراغ وخداع النظام لحسابها فوراً
+                -- نظام FakeHeadshot V5 المتطور (هيت بوكسات واسعة جداً للإيد والضرب من الجنب والفراغ)
                 local boxes = {}
                 
-                -- الهيت بوكس الأول (المنتصف الواسع جداً)
+                -- هيت بوكس الأيدي الممتدة والواسعة (Fake Reach V5)
                 local box1 = Instance.new("Part")
-                box1.Name = "FakeHeadshotV4_Mid"
-                box1.Size = Vector3.new(20, 8, 20)
+                box1.Name = "FakeHeadshotV5_HandsAndSides"
+                box1.Size = Vector3.new(22, 9, 22)
                 box1.Transparency = 1
                 box1.CanCollide = false
                 box1.Massless = true
@@ -199,10 +222,10 @@ task.spawn(function()
                 weld1.Parent = box1
                 table.insert(boxes, box1)
 
-                -- الهيت بوكس الثاني (السفلي للأرض)
+                -- هيت بوكس علوي إضافي لضمان تسجيل كل ضربة بدقة
                 local box2 = Instance.new("Part")
-                box2.Name = "FakeHeadshotV4_Low"
-                box2.Size = Vector3.new(18, 7, 18)
+                box2.Name = "FakeHeadshotV5_UpperZone"
+                box2.Size = Vector3.new(18, 8, 18)
                 box2.Transparency = 1
                 box2.CanCollide = false
                 box2.Massless = true
@@ -214,22 +237,6 @@ task.spawn(function()
                 weld2.Part1 = box2
                 weld2.Parent = box2
                 table.insert(boxes, box2)
-
-                -- الهيت بوكس الثالث (العلوي للفراغ والهيدشوت)
-                local box3 = Instance.new("Part")
-                box3.Name = "FakeHeadshotV4_High"
-                box3.Size = Vector3.new(18, 7, 18)
-                box3.Transparency = 1
-                box3.CanCollide = false
-                box3.Massless = true
-                box3.Anchored = false
-                box3.Parent = char
-                
-                local weld3 = Instance.new("WeldConstraint")
-                weld3.Part0 = hrp
-                weld3.Part1 = box3
-                weld3.Parent = box3
-                table.insert(boxes, box3)
 
                 playerBoxes[p] = boxes
             end
@@ -267,8 +274,8 @@ task.spawn(function()
                 local boxes = {}
                 
                 local box1 = Instance.new("Part")
-                box1.Name = "FakeHeadshotV4_Mid"
-                box1.Size = Vector3.new(20, 8, 20)
+                box1.Name = "FakeHeadshotV5_HandsAndSides"
+                box1.Size = Vector3.new(22, 9, 22)
                 box1.Transparency = 1
                 box1.CanCollide = false
                 box1.Massless = true
@@ -282,8 +289,8 @@ task.spawn(function()
                 table.insert(boxes, box1)
 
                 local box2 = Instance.new("Part")
-                box2.Name = "FakeHeadshotV4_Low"
-                box2.Size = Vector3.new(18, 7, 18)
+                box2.Name = "FakeHeadshotV5_UpperZone"
+                box2.Size = Vector3.new(18, 8, 18)
                 box2.Transparency = 1
                 box2.CanCollide = false
                 box2.Massless = true
@@ -295,21 +302,6 @@ task.spawn(function()
                 weld2.Part1 = box2
                 weld2.Parent = box2
                 table.insert(boxes, box2)
-
-                local box3 = Instance.new("Part")
-                box3.Name = "FakeHeadshotV4_High"
-                box3.Size = Vector3.new(18, 7, 18)
-                box3.Transparency = 1
-                box3.CanCollide = false
-                box3.Massless = true
-                box3.Anchored = false
-                box3.Parent = char
-                
-                local weld3 = Instance.new("WeldConstraint")
-                weld3.Part0 = hrp
-                weld3.Part1 = box3
-                weld3.Parent = box3
-                table.insert(boxes, box3)
 
                 playerBoxes[p] = boxes
             end
