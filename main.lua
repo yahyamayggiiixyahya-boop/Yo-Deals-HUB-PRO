@@ -1,5 +1,5 @@
 -- =====================================================
---  يويو ديلز | النسخة المصغرة الخفيفة (90 FPS + قائمة اليمين + السكريبتات الأساسية)
+--  يويو ديلز | النسخة النهائية المستقرة (90 FPS + Ping Optimizer + قائمة اليمين)
 -- =====================================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -7,10 +7,19 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- 1. بوست أداء خفيف ومحدد على 90 فريم لجهازك لتجنب أي ثقل
+-- 1. بوست أداء (90 FPS) + تحسين البنج والشبكة لمنع أي تهنيج
 pcall(function()
     setfpscap(90)
     Workspace.StreamingEnabled = true
+    
+    local networkSettings = settings():FindFirstChild("NetworkSettings")
+    if networkSettings then
+        pcall(function()
+            networkSettings.IncomingReplicationLag = 0
+            networkSettings.PhysicsReceiveTimeout = 0
+        end)
+    end
+
     for _, v in ipairs(Workspace:GetDescendants()) do
         if v:IsA("BasePart") then v.CastShadow = false end
     end
@@ -25,7 +34,7 @@ task.spawn(function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_batV1/refs/heads/main/anti_batV1"))() end)
 end)
 
--- 3. القائمة المصغرة (مثبتة على الجنب الأيمن تماماً بعيداً عن منيو الهاك)
+-- 3. القائمة المصغرة (مثبتة على الجنب الأيمن تماماً وقابلة للسحب)
 task.spawn(function()
     pcall(function()
         if CoreGui:FindFirstChild("YoDealsMenuFinal") then CoreGui.YoDealsMenuFinal:Destroy() end
@@ -37,7 +46,6 @@ task.spawn(function()
         local Frame = Instance.new("Frame", Gui)
         Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
         Frame.BackgroundTransparency = 0.2
-        -- التثبيت على الجنب الأيمن تماماً
         Frame.Position = UDim2.new(0.85, 0, 0.15, 0)
         Frame.Size = UDim2.new(0, 130, 0, 80)
         Frame.Active = true
