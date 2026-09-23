@@ -1,13 +1,15 @@
 -- =====================================================
---  يويو ديلز | النسخة النهائية المستقرة (90 FPS + Ping Optimizer + قائمة اليمين)
+--  يويو ديلز | النسخة الحرة الذكية (90 FPS + مساعدة أيم مرنة بدون كاميرا لوك)
 -- =====================================================
 
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
 
--- 1. بوست أداء (90 FPS) + تحسين البنج والشبكة لمنع أي تهنيج
+-- 1. بوست أداء (90 FPS) + تثبيت الشبكة لمنع الـ Lag
 pcall(function()
     setfpscap(90)
     Workspace.StreamingEnabled = true
@@ -34,7 +36,30 @@ task.spawn(function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_batV1/refs/heads/main/anti_batV1"))() end)
 end)
 
--- 3. القائمة المصغرة (مثبتة على الجنب الأيمن تماماً وقابلة للسحب)
+-- 3. مساعدة أيم مرنة وحرة (تنعيم حركة الإدخال نحو الهدف بدون قفل الكاميرا)
+local assistEnabled = false
+task.spawn(function()
+    pcall(function()
+        RunService.RenderStepped:Connect(function()
+            if not assistEnabled then return end
+            pcall(function()
+                local mouse = LocalPlayer:GetMouse()
+                local target = mouse.Target
+                if target and target.Parent then
+                    local humanoid = target.Parent:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.Health > 0 and target.Parent ~= LocalPlayer.Character then
+                        -- مساعد إدخال خفيف جداً يحسن استجابة السحب نحو اللاعب بحرية تامة دون إجبار الكاميرا
+                        local currentPos = Camera.CFrame
+                        local targetPos = CFrame.new(Camera.CFrame.Position, target.Position)
+                        Camera.CFrame = currentPos:Lerp(targetPos, 0.05) -- نسبة نعومة عالية تتيح لك الحركة والحرية
+                    end
+                end
+            end)
+        end)
+    end)
+end)
+
+-- 4. القائمة المصغرة (مثبتة على الجنب الأيمن تماماً وقابلة للسحب)
 task.spawn(function()
     pcall(function()
         if CoreGui:FindFirstChild("YoDealsMenuFinal") then CoreGui.YoDealsMenuFinal:Destroy() end
@@ -47,7 +72,7 @@ task.spawn(function()
         Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
         Frame.BackgroundTransparency = 0.2
         Frame.Position = UDim2.new(0.85, 0, 0.15, 0)
-        Frame.Size = UDim2.new(0, 130, 0, 80)
+        Frame.Size = UDim2.new(0, 130, 0, 120)
         Frame.Active = true
         Frame.Draggable = true
 
@@ -64,9 +89,10 @@ task.spawn(function()
         Title.TextColor3 = Color3.fromRGB(255, 255, 255)
         Title.TextSize = 11
 
+        -- زر Anti-Bat
         local Btn = Instance.new("TextButton", Frame)
         Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-        Btn.Position = UDim2.new(0.1, 0, 0.4, 0)
+        Btn.Position = UDim2.new(0.1, 0, 0.25, 0)
         Btn.Size = UDim2.new(0, 104, 0, 32)
         Btn.Font = Enum.Font.GothamBold
         Btn.Text = "Anti-Bat: OFF"
@@ -90,10 +116,34 @@ task.spawn(function()
                 Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
             end
         end)
+
+        -- زر Aim Assist الحر الجديد
+        local AssistBtn = Instance.new("TextButton", Frame)
+        AssistBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+        AssistBtn.Position = UDim2.new(0.1, 0, 0.62, 0)
+        AssistBtn.Size = UDim2.new(0, 104, 0, 32)
+        AssistBtn.Font = Enum.Font.GothamBold
+        AssistBtn.Text = "Aim-Assist: OFF"
+        AssistBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+        AssistBtn.TextSize = 10
+        Instance.new("UICorner", AssistBtn).CornerRadius = UDim.new(0, 6)
+
+        AssistBtn.MouseButton1Click:Connect(function()
+            assistEnabled = not assistEnabled
+            if assistEnabled then
+                AssistBtn.Text = "Aim-Assist: ON"
+                AssistBtn.TextColor3 = Color3.fromRGB(50, 255, 50)
+                AssistBtn.BackgroundColor3 = Color3.fromRGB(20, 60, 30)
+            else
+                AssistBtn.Text = "Aim-Assist: OFF"
+                AssistBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+                AssistBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+            end
+        end)
     end)
 end)
 
--- 4. علامة الكورة الحمراء البسيطة جداً فوق اللاعبين
+-- 5. علامة الكورة الحمراء البسيطة جداً فوق اللاعبين
 task.spawn(function()
     local function addDot(p)
         if p == LocalPlayer then return end
