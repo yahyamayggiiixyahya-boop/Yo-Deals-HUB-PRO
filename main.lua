@@ -1,5 +1,5 @@
 -- =====================================================
---  يويو ديلز | النسخة الحرة الذكية (90 FPS + مساعدة أيم مرنة بدون كاميرا لوك)
+--  يويو ديلز | النسخة الأصلية + تحسين النت و95 FPS والخلفية
 -- =====================================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -9,11 +9,12 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
--- 1. بوست أداء (90 FPS) + تثبيت الشبكة لمنع الـ Lag
+-- 1. بوست أداء (95 FPS + تثبيت النت ومنع الثقل + العمل في الخلفية)
 pcall(function()
-    setfpscap(90)
+    setfpscap(95)
     Workspace.StreamingEnabled = true
     
+    -- تحسين استجابة الشبكة ومنع الـ Lag
     local networkSettings = settings():FindFirstChild("NetworkSettings")
     if networkSettings then
         pcall(function()
@@ -22,25 +23,29 @@ pcall(function()
         end)
     end
 
+    -- إزالة الظلال وخفة الأداء عشان السكريبت ميتقلش
     for _, v in ipairs(Workspace:GetDescendants()) do
         if v:IsA("BasePart") then v.CastShadow = false end
     end
 end)
 
--- 2. تشغيل السكريبتين الأساسيين في الخلفية (مع ريست سكريبت الـ anti_batV1 لضمان ظهوره دائماً)
+-- منع انخفاض الفريمات أو توقف اللعبة في الخلفية (Background FPS)
+pcall(function()
+    if UserSettings then
+        local us = UserSettings():GetService("UserGameSettings")
+        if us then
+            us.SavedQualityLevel = Enum.SavedQualityLevel.Level1
+        end
+    end
+end)
+
+-- 2. تشغيل السكريبتين الأساسيين في الخلفية (النسخة الأصلية زي ما طلبته)
 task.spawn(function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/Yo-Deals-/refs/heads/main/main.lua"))() end)
 end)
 
 task.spawn(function()
-    pcall(function()
-        for _, gui in ipairs(CoreGui:GetChildren()) do
-            if gui.Name:lower():find("antibat") or gui.Name:lower():find("bat") then
-                gui:Destroy()
-            end
-        end
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_batV1/refs/heads/main/anti_batV1"))()
-    end)
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_batV1/refs/heads/main/anti_batV1"))() end)
 end)
 
 -- 3. مساعدة أيم مرنة وحرة (تنعيم حركة الإدخال نحو الهدف بدون قفل الكاميرا)
@@ -66,7 +71,7 @@ task.spawn(function()
     end)
 end)
 
--- 4. القائمة المصغرة (مثبتة على الجنب الأيمن تماماً وقابلة للسحب)
+-- 4. القائمة المصغرة (مثبتة على الجنب الأيمن تماماً وقابلة للسحب - نسختك الأصلية)
 task.spawn(function()
     pcall(function()
         if CoreGui:FindFirstChild("YoDealsMenuFinal") then CoreGui.YoDealsMenuFinal:Destroy() end
