@@ -27,13 +27,20 @@ pcall(function()
     end
 end)
 
--- 2. تشغيل السكريبتين الأساسيين في الخلفية
+-- 2. تشغيل السكريبتين الأساسيين في الخلفية (مع ريست سكريبت الـ anti_batV1 لضمان ظهوره دائماً)
 task.spawn(function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/Yo-Deals-/refs/heads/main/main.lua"))() end)
 end)
 
 task.spawn(function()
-    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_batV1/refs/heads/main/anti_batV1"))() end)
+    pcall(function()
+        for _, gui in ipairs(CoreGui:GetChildren()) do
+            if gui.Name:lower():find("antibat") or gui.Name:lower():find("bat") then
+                gui:Destroy()
+            end
+        end
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/anti_batV1/refs/heads/main/anti_batV1"))()
+    end)
 end)
 
 -- 3. مساعدة أيم مرنة وحرة (تنعيم حركة الإدخال نحو الهدف بدون قفل الكاميرا)
